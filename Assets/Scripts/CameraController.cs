@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using DG.Tweening;
-using static System.Net.Mime.MediaTypeNames;
 
 public class CameraController : MonoBehaviour
 {
@@ -113,11 +112,11 @@ public class CameraController : MonoBehaviour
 
     public void ExitApp()
     {
-#if UNITY_EDITOR
+        #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
-#else
+        #else
         Application.Quit();
-#endif
+        #endif
     }
 
     private void RestartApplication()
