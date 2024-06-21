@@ -7,22 +7,22 @@ using DG.Tweening;
 
 public class CameraController : MonoBehaviour
 {
-    public GameObject[] roomPositions; // Array of GameObjects for camera positions
-    public Canvas[] roomCanvases; // Array of Canvases for each room
-    public Canvas initialCanvas; // Reference to the initial canvas
+    public GameObject[] roomPositions; 
+    public Canvas[] roomCanvases; 
+    public Canvas initialCanvas; 
     public GameObject ExitButton;
-    public Slider transitionSpeedSlider; // Slider to control transition speed
+    public Slider transitionSpeedSlider; 
 
-    private int Counter = -1; // This should start at -1 to ensure the first move is correct
+    private int Counter = -1; 
     private float transitionSpeed = 2f;
 
     private void Start()
     {
         DisableAllCanvases();
-        ExitButton.SetActive(true); // Ensure ExitButton is active at start
-        initialCanvas.gameObject.SetActive(true); // Ensure initial canvas is active at start
+        ExitButton.SetActive(true); 
+        initialCanvas.gameObject.SetActive(true); 
 
-        // Set up slider listener for transition speed
+        
         transitionSpeedSlider.onValueChanged.AddListener(UpdateTransitionSpeed);
     }
 
@@ -41,7 +41,7 @@ public class CameraController : MonoBehaviour
 
     public void ActualStart()
     {
-        Counter = 0; // Ensure Counter starts at the first room
+        Counter = 0; 
         MoveCamera();
     }
 
@@ -55,7 +55,7 @@ public class CameraController : MonoBehaviour
         if (Counter >= 0 && Counter < roomPositions.Length && roomPositions[Counter] != null)
         {
             transform.DOMove(roomPositions[Counter].transform.position, transitionSpeed).SetEase(Ease.InOutSine);
-            transform.rotation = roomPositions[Counter].transform.rotation; // Set camera rotation
+            transform.rotation = roomPositions[Counter].transform.rotation; 
 
             ActivateCanvas(Counter);
         }
@@ -75,11 +75,10 @@ public class CameraController : MonoBehaviour
         Counter++;
         if (Counter >= roomPositions.Length)
         {
-            Counter = 0; // Loop back to the first room
+            Counter = 0; 
             MoveCamera();
-            initialCanvas.gameObject.SetActive(true); // Activate the initial canvas
-
-            // Deactivate all other canvases except the initial canvas
+            initialCanvas.gameObject.SetActive(true); 
+           
             foreach (Canvas canvas in roomCanvases)
             {
                 if (canvas != initialCanvas)
@@ -88,7 +87,7 @@ public class CameraController : MonoBehaviour
                 }
             }
 
-            // Restart the application
+
             RestartApplication();
         }
         else
@@ -96,7 +95,7 @@ public class CameraController : MonoBehaviour
             MoveCamera();
         }
 
-        // Do not deactivate ExitButton
+        
         ExitButton.SetActive(true);
     }
 
@@ -105,7 +104,7 @@ public class CameraController : MonoBehaviour
         Counter--;
         if (Counter < 0)
         {
-            Counter = roomPositions.Length - 1; // Loop back to the last room
+            Counter = roomPositions.Length - 1; 
         }
         MoveCamera();
     }
