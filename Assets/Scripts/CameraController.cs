@@ -7,28 +7,31 @@ using DG.Tweening;
 
 public class CameraController : MonoBehaviour
 {
-    public GameObject[] roomPositions; 
-    public Canvas[] roomCanvases; 
-    public Canvas initialCanvas; 
+    public GameObject[] positions;
+    public Canvas[] canvases;
+    public Canvas firstCanvas;
     public GameObject ExitButton;
-    public Slider transitionSpeedSlider; 
+    public Slider SpeedSlider;
 
-    private int Counter = -1; 
-    private float transitionSpeed = 2f;
+    private int Counter = -1;
+    private float transitionSpeed = 5f;
 
     private void Start()
     {
-        DisableAllCanvases();
-        ExitButton.SetActive(true); 
-        initialCanvas.gameObject.SetActive(true); 
-
-        
-        transitionSpeedSlider.onValueChanged.AddListener(UpdateTransitionSpeed);
+        SetInitialState();
+        SpeedSlider.onValueChanged.AddListener(UpdateTransitionSpeed);
     }
 
-    private void DisableAllCanvases()
+    private void SetInitialState()
     {
-        foreach (Canvas canvas in roomCanvases)
+        HideAllCanvases();
+        ExitButton.SetActive(true);
+        firstCanvas.gameObject.SetActive(true);
+    }
+
+    private void HideAllCanvases()
+    {
+        foreach (var canvas in canvases)
         {
             canvas.gameObject.SetActive(false);
         }
@@ -41,8 +44,8 @@ public class CameraController : MonoBehaviour
 
     public void ActualStart()
     {
-        Counter = 0; 
-        MoveCamera();
+        Counter = 0;
+        TransitionCamera();
     }
 
     private void UpdateTransitionSpeed(float value)
@@ -50,53 +53,63 @@ public class CameraController : MonoBehaviour
         transitionSpeed = value;
     }
 
-    private void MoveCamera()
+    private void TransitionCamera()
     {
-        if (Counter >= 0 && Counter < roomPositions.Length && roomPositions[Counter] != null)
+        if (IsValidCounter())
         {
-            transform.DOMove(roomPositions[Counter].transform.position, transitionSpeed).SetEase(Ease.InOutSine);
-            transform.rotation = roomPositions[Counter].transform.rotation; 
+            var targetPosition = positions[Counter].transform.position;
+            var targetRotation = positions[Counter].transform.rotation;
+            transform.DOMove(targetPosition, transitionSpeed).SetEase(Ease.InOutSine);
+            transform.rotation = targetRotation;
 
-            ActivateCanvas(Counter);
+            ShowCanvas(Counter);
         }
     }
 
-    private void ActivateCanvas(int index)
+    private bool IsValidCounter()
     {
-        if (index >= 0 && index < roomCanvases.Length)
+        return Counter >= 0 && Counter < positions.Length && positions[Counter] != null;
+    }
+
+    private void ShowCanvas(int index)
+    {
+        if (index >= 0 && index < canvases.Length)
         {
-            DisableAllCanvases();
-            roomCanvases[index].gameObject.SetActive(true);
+            HideAllCanvases();
+            canvases[index].gameObject.SetActive(true);
         }
     }
 
     public void NextScene()
     {
         Counter++;
-        if (Counter >= roomPositions.Length)
+        if (Counter >= positions.Length)
         {
-            Counter = 0; 
-            MoveCamera();
-            initialCanvas.gameObject.SetActive(true); 
-           
-            foreach (Canvas canvas in roomCanvases)
-            {
-                if (canvas != initialCanvas)
-                {
-                    canvas.gameObject.SetActive(false);
-                }
-            }
-
-
-            RestartApplication();
+            ResetToFirstScene();
         }
         else
         {
-            MoveCamera();
+            TransitionCamera();
         }
 
-        
         ExitButton.SetActive(true);
+    }
+
+    private void ResetToFirstScene()
+    {
+        Counter = 0;
+        TransitionCamera();
+        firstCanvas.gameObject.SetActive(true);
+
+        foreach (var canvas in canvases)
+        {
+            if (canvas != firstCanvas)
+            {
+                canvas.gameObject.SetActive(false);
+            }
+        }
+
+        RestartApplication();
     }
 
     public void Previous()
@@ -104,18 +117,18 @@ public class CameraController : MonoBehaviour
         Counter--;
         if (Counter < 0)
         {
-            Counter = roomPositions.Length - 1; 
+            Counter = positions.Length - 1;
         }
-        MoveCamera();
+        TransitionCamera();
     }
 
     public void ExitApp()
     {
-        #if UNITY_EDITOR
+#if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
-        #else
+#else
         Application.Quit();
-        #endif
+#endif
     }
 
     private void RestartApplication()
